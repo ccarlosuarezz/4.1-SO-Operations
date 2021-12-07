@@ -28,8 +28,14 @@
             <label for="arch_shared_time"><strong>Sistemas de tiempo compartido</strong></label>
         </div>
     </div>
-    <div>
-        <input type="number" name="" id="process_quantity">
+    <div class="form_container">
+        <div class="form">
+            <input type="number" name="process_quantity_value" id="process_quantity" autocomplete="off" required/>
+            <label for="process_quantity_value" class="label_input">
+                <span class="content_input">Cantidad de procesos</span>
+            </label>
+        </div>
+        <!-- <input type="number" name="" id="process_quantity"> -->
         <button id="exec_button">Ejecutar</button>
     </div>
     <div id="processes" class="processes"></div>

@@ -54,6 +54,71 @@ input[type='radio']:checked:before {
   background:var(--green-color);
 }
 
+.form_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    column-gap: 20px;
+}
+
+.form {
+    width: 50%;
+    position: relative;
+    height: 50%;
+    overflow: hidden;
+}
+
+.form input {
+    width: 250px;
+    height: 100%;
+    font-size: 16px;
+    color: var(--dark-gray);
+    padding-top: 30px;
+    border: none;
+    outline: none;
+}
+
+.form label {
+    position: absolute;
+    bottom: 0px;
+    left: 0%;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    border-bottom: 2px solid var(--dark-gray);
+}
+
+.form label::after {
+    content: '';
+    position: absolute;
+    left: 0px;
+    bottom: -2px;
+    width: 100%;
+    height: 100%;
+    border-bottom: 4px solid var(--green-color);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+.content_input {
+    position: absolute;
+    bottom: 5px;
+    left: 0px;
+    transition: all 0.3s ease;
+}
+
+.form input:focus + .label_input .content_input,
+.form input:valid + .label_input .content_input {
+    transform: translateY(-150%);
+    font-size: 14px;
+    color: var(--green-color);
+}
+
+.form input:focus + .label_input::after,
+.form input:valid + .label_input::after {
+    transform: translateX(0%);
+}
+
 .processes {
     display: flex;
     flex-direction: row;

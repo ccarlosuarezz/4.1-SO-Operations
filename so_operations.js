@@ -67,8 +67,8 @@ function serialProcessing(processQuantity) {
         let processTime = generatePseudoRandomProcessTime(3, 10);
         processTimes.push(processTime);
         const pTimeProcess = document.createElement('p');
-        pTimeProcess.innerHTML = `Time: ${processTime} s`;
-        pTimeProcess.id = 'time_process'
+        pTimeProcess.innerText = `Time: ${processTime} s`;
+        pTimeProcess.id = `time_process`;
         newDiv.append(pNumberProcess, pCreated, pReady, pExecuting, pTerminated, pTimeProcess);
         processes.appendChild(newDiv);
     }
@@ -89,11 +89,12 @@ function serialProcessing(processQuantity) {
             document.getElementById(`ready${i}`).style.background = DARK_GRAY_COLOR;
             document.getElementById(`executing${i}`).style.background = GREEN_COLOR;
 
-            for (let j = 0; j < 1; j++) {
-                await sleep(3000);
-                document.getElementById(`executing${i}`).style.background = DARK_GRAY_COLOR;
-                document.getElementById(`terminated${i}`).style.background = ORANGE_COLOR;
+            for (let j = 1; j <= processTimes[i-1]; j++) {
+                await sleep(1000);
+                document.getElementById(`process${i}`).lastChild.innerText = `Time: ${processTimes[i-1] - j} s`;
             }
+            document.getElementById(`executing${i}`).style.background = DARK_GRAY_COLOR;
+            document.getElementById(`terminated${i}`).style.background = ORANGE_COLOR;
         }
     }
     changeToReady();
