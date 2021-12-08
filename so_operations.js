@@ -175,7 +175,7 @@ function batchProcessingMono(processQuantity) {
                     i++;
                 }
 
-                await sleep(500);
+                await sleep(100);
                 document.getElementById('busy_memory').innerHTML = `<b>Memoria Ocupada: ${sumProcessesSize} KB</b>`;
                 for (let j = attended; j < i; j++) {
                     document.getElementById(`created${j}`).style.background = DARK_GRAY_COLOR;
@@ -204,8 +204,18 @@ function batchProcessingMono(processQuantity) {
 }
 
 function batchProcessingMulti(processQuantity) {
+    let processSizes = [];
     let processTimes = [];
-    let processTime = 0;
+    let memorySize = 256;
+    const QUANTUM = 2; //medida en segundos
+    let actualProcessTime = 0;
+    const pTotalMemory = document.createElement('p');
+    pTotalMemory.innerHTML = `<b>Memoria Total: ${memorySize} KB</b>`;
+    pTotalMemory.id = 'memory_size';
+    const pBusyMemory = document.createElement('p');
+    pBusyMemory.innerHTML = `<b>Memoria Ocupada: 0 KB</b>`;
+    pBusyMemory.id = 'busy_memory';
+    memoryInfo.append(pTotalMemory, pBusyMemory);
     for (let i = 0; i < processQuantity; i++) {
         const newDiv = document.createElement('div');
         newDiv.id = `process${i}`;
@@ -218,21 +228,28 @@ function batchProcessingMulti(processQuantity) {
         const pReady = document.createElement('p');
         pReady.innerHTML = '<b>Ready</b>';
         pReady.id = `ready${i}`;
+        const pWaiting = document.createElement('p');
+        pWaiting.innerHTML = '<b>Waiting</b>';
+        pWaiting.id = `waiting${i}`;
         const pExecuting = document.createElement('p');
         pExecuting.innerHTML = '<b>Executing</b>';
         pExecuting.id = `executing${i}`;
         const pTerminated = document.createElement('p');
         pTerminated.innerHTML = '<b>Terminated</b>';
         pTerminated.id = `terminated${i}`;
+        let processSize = generatePseudoRandom(50, 80);
+        processSizes.push(processSize);
+        const pProcessSize = document.createElement('p');
+        pProcessSize.innerHTML = `Tamaño: ${processSize} KB`;
+        pProcessSize.id = 'size_process';
         let processTime = generatePseudoRandom(3, 7);
         processTimes.push(processTime);
         const pTimeProcess = document.createElement('p');
         pTimeProcess.innerText = `Tiempo: ${processTime} s`;
-        pTimeProcess.id = `time_process`;
-        newDiv.append(pNumberProcess, pCreated, pReady, pExecuting, pTerminated, pTimeProcess);
+        pTimeProcess.id = 'time_process';
+        newDiv.append(pNumberProcess, pCreated, pReady, pWaiting, pExecuting, pTerminated, pProcessSize, pTimeProcess);
         processes.appendChild(newDiv);
     }
-    totalTime.innerHTML = `<p><b>Tiempo total: ${processTime} s</b></p>`;
 
     for (let i = 0; i < processQuantity; i++) {
         document.getElementById(`created${i}`).style.background = BLUE_COLOR;
@@ -241,23 +258,66 @@ function batchProcessingMulti(processQuantity) {
     const sleep = (milliseconds) => {
         return new Promise((resolve) => {setTimeout(resolve, milliseconds)})
     }
-    const changeState = async () => {
-        for (let i = 0; i < processQuantity; i++) {
-            await sleep(300);
-            document.getElementById(`created${i}`).style.background = DARK_GRAY_COLOR;
-            document.getElementById(`ready${i}`).style.background = YELLOW_COLOR;
-            await sleep(300);
-            document.getElementById(`ready${i}`).style.background = DARK_GRAY_COLOR;
-            document.getElementById(`executing${i}`).style.background = GREEN_COLOR;
 
-            for (let j = 0; j < processTimes[i]; j++) {
-                await sleep(1000);
-                document.getElementById(`process${i}`).lastChild.innerText = `Tiempo: ${processTimes[i]-(j+1)} s`;
-                processTime++;
-                totalTime.innerHTML = `<p><b>Tiempo total: ${processTime} s</b></p>`;
+    let sumProcessesSize = 0;
+    let attended = 0;
+    let processQueue = [];
+    const changeState = async () => {
+        await sleep(1000);
+        for (let i = 0; i < processQuantity; i++) {
+            sumProcessesSize += processSizes[i];
+            if (sumProcessesSize > memorySize || i == processQuantity-1) {
+                if (i != processQuantity-1 || (i == processQuantity-1 && sumProcessesSize > memorySize)) {
+                    sumProcessesSize -= processSizes[i];
+                } else if (i == processQuantity-1 && sumProcessesSize <= memorySize) {
+                    i++;
+                }
+
+                await sleep(500);
+                document.getElementById('busy_memory').innerHTML = `<b>Memoria Ocupada: ${sumProcessesSize} KB</b>`;
+                console.log(attended);
+                for (let j = attended; j < i; j++) {
+                    processQueue.push({process: j, processTime: processTimes[j]});
+                    document.getElementById(`created${j}`).style.background = DARK_GRAY_COLOR;
+                    document.getElementById(`ready${j}`).style.background = YELLOW_COLOR;
+                    await sleep(70);
+                }
+
+                await sleep(300);
+                if (processQueue.length > 1) {
+                    for (let j = 1; j < processQueue.length; j++) {
+                        document.getElementById(`ready${processQueue[j].process}`).style.background = DARK_GRAY_COLOR;
+                        document.getElementById(`waiting${processQueue[j].process}`).style.background = RED_COLOR;
+                    }
+                }
+                while(processQueue.length != 0) {
+                        document.getElementById(`ready${processQueue[0].process}`).style.background = DARK_GRAY_COLOR;
+                        document.getElementById(`waiting${processQueue[0].process}`).style.background = DARK_GRAY_COLOR;
+                        document.getElementById(`executing${processQueue[0].process}`).style.background = GREEN_COLOR;
+                        for (let j = 0; j < QUANTUM; j++) {
+                            if(processQueue[0].processTime > 0) {
+                                await sleep(1000);
+                                document.getElementById(`process${processQueue[0].process}`).lastChild.innerText = `Tiempo: ${processQueue[0].processTime - 1} s`;
+                                processQueue[0].processTime--;
+                                actualProcessTime++;
+                                totalTime.innerHTML = `<p><b>Tiempo total: ${actualProcessTime} s</b></p>`;
+                            } else if (processQueue[0].processTime == 0) {
+                                break;
+                            }
+                        }
+                        document.getElementById(`executing${processQueue[0].process}`).style.background = DARK_GRAY_COLOR;
+                        if (processQueue[0].processTime == 0) {
+                            document.getElementById(`terminated${processQueue[0].process}`).style.background = ORANGE_COLOR;
+                            processQueue.shift();
+                        } else {
+                            document.getElementById(`waiting${processQueue[0].process}`).style.background = RED_COLOR;
+                            processQueue.push(processQueue.shift());
+                        }
+                }
+                attended = i;
+                sumProcessesSize = 0;
+                i--;
             }
-            document.getElementById(`executing${i}`).style.background = DARK_GRAY_COLOR;
-            document.getElementById(`terminated${i}`).style.background = ORANGE_COLOR;
         }
     }
     changeState();
