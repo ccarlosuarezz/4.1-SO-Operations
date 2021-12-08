@@ -290,29 +290,37 @@ function batchProcessingMulti(processQuantity) {
                         document.getElementById(`waiting${processQueue[j].process}`).style.background = RED_COLOR;
                     }
                 }
+
+                let isProcessingBatch = false;
                 while(processQueue.length != 0) {
-                        document.getElementById(`ready${processQueue[0].process}`).style.background = DARK_GRAY_COLOR;
+                    if (isProcessingBatch) {
                         document.getElementById(`waiting${processQueue[0].process}`).style.background = DARK_GRAY_COLOR;
-                        document.getElementById(`executing${processQueue[0].process}`).style.background = GREEN_COLOR;
-                        for (let j = 0; j < QUANTUM; j++) {
-                            if(processQueue[0].processTime > 0) {
-                                await sleep(1000);
-                                document.getElementById(`process${processQueue[0].process}`).lastChild.innerText = `Tiempo: ${processQueue[0].processTime - 1} s`;
-                                processQueue[0].processTime--;
-                                actualProcessTime++;
-                                totalTime.innerHTML = `<p><b>Tiempo total: ${actualProcessTime} s</b></p>`;
-                            } else if (processQueue[0].processTime == 0) {
-                                break;
-                            }
+                        document.getElementById(`ready${processQueue[0].process}`).style.background = YELLOW_COLOR;
+                        await sleep(300);
+                        
+                    }
+                    document.getElementById(`ready${processQueue[0].process}`).style.background = DARK_GRAY_COLOR;
+                    document.getElementById(`executing${processQueue[0].process}`).style.background = GREEN_COLOR;
+                    for (let j = 0; j < QUANTUM; j++) {
+                        if(processQueue[0].processTime > 0) {
+                            await sleep(1000);
+                            document.getElementById(`process${processQueue[0].process}`).lastChild.innerText = `Tiempo: ${processQueue[0].processTime - 1} s`;
+                            processQueue[0].processTime--;
+                            actualProcessTime++;
+                            totalTime.innerHTML = `<p><b>Tiempo total: ${actualProcessTime} s</b></p>`;
+                        } else if (processQueue[0].processTime == 0) {
+                            break;
                         }
-                        document.getElementById(`executing${processQueue[0].process}`).style.background = DARK_GRAY_COLOR;
-                        if (processQueue[0].processTime == 0) {
-                            document.getElementById(`terminated${processQueue[0].process}`).style.background = ORANGE_COLOR;
-                            processQueue.shift();
-                        } else {
-                            document.getElementById(`waiting${processQueue[0].process}`).style.background = RED_COLOR;
-                            processQueue.push(processQueue.shift());
-                        }
+                    }
+                    document.getElementById(`executing${processQueue[0].process}`).style.background = DARK_GRAY_COLOR;
+                    if (processQueue[0].processTime == 0) {
+                        document.getElementById(`terminated${processQueue[0].process}`).style.background = ORANGE_COLOR;
+                        processQueue.shift();
+                    } else {
+                        document.getElementById(`waiting${processQueue[0].process}`).style.background = RED_COLOR;
+                        processQueue.push(processQueue.shift());
+                    }
+                    isProcessingBatch = true;
                 }
                 attended = i;
                 sumProcessesSize = 0;

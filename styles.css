@@ -119,6 +119,17 @@ input[type='radio']:checked:before {
     transform: translateX(0%);
 }
 
+.exec_button {
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background: var(--green-color);
+    color: white;
+    font-size: 16px;
+    padding-inline: 30px;
+    cursor: pointer;
+}
+
 .processes {
     display: flex;
     flex-direction: row;
