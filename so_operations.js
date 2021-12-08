@@ -8,6 +8,7 @@ const execButton = document.getElementById('exec_button');
 
 const processes = document.getElementById('processes');
 const totalTime = document.getElementById('total_time');
+const memoryInfo = document.getElementById('memory_info');
 
 const GREEN_COLOR = '#00D455';
 const YELLOW_COLOR = '#FFCA03';
@@ -29,13 +30,13 @@ function simulate() {
             serialProcessing(processQuantity);
         } else if (archBatchMono.checked) {
             resetDivProcesses();
-            window.alert('2');
+            batchProcessingMono(processQuantity);
         } else if (archBatchMulti.checked) {
             resetDivProcesses();
-            window.alert('3');
+            batchProcessingMulti(processQuantity);
         } else if (archSharedTime.checked) {
             resetDivProcesses();
-            window.alert('4');
+            shareTimeSystem(processQuantity)
         } else {
             window.alert('Aun no ha seleccionado una arquitectura');
         }
@@ -44,44 +45,51 @@ function simulate() {
     }
 }
 
+/**
+ * Método que permite mostrar las operaciones de un Sistema Operativo con Procesamiento en serie
+ * @param {*} processQuantity 
+ */
 function serialProcessing(processQuantity) {
     let processTimes = [];
-    for (let i = 1; i <= processQuantity; i++) {
+    let processTime = 0;
+    for (let i = 0; i < processQuantity; i++) {
         const newDiv = document.createElement('div');
         newDiv.id = `process${i}`;
         const pNumberProcess = document.createElement('p');
-        pNumberProcess.innerHTML = `<strong>Proceso ${i}</strong>`;
+        pNumberProcess.innerHTML = `<b>Proceso ${i+1}</b>`;
         pNumberProcess.id = 'number_process';
         const pCreated = document.createElement('p');
-        pCreated.innerHTML = '<strong>Created</strong>';
+        pCreated.innerHTML = '<b>Created</b>';
         pCreated.id = `created${i}`;
         const pReady = document.createElement('p');
-        pReady.innerHTML = '<strong>Ready</strong>';
+        pReady.innerHTML = '<b>Ready</b>';
         pReady.id = `ready${i}`;
         const pExecuting = document.createElement('p');
-        pExecuting.innerHTML = '<strong>Executing</strong>';
+        pExecuting.innerHTML = '<b>Executing</b>';
         pExecuting.id = `executing${i}`;
         const pTerminated = document.createElement('p');
-        pTerminated.innerHTML = '<strong>Terminated</strong>';
+        pTerminated.innerHTML = '<b>Terminated</b>';
         pTerminated.id = `terminated${i}`;
-        let processTime = generatePseudoRandomProcessTime(3, 10);
+        let processTime = generatePseudoRandom(3, 7);
         processTimes.push(processTime);
         const pTimeProcess = document.createElement('p');
-        pTimeProcess.innerText = `Time: ${processTime} s`;
+        pTimeProcess.innerText = `Tiempo: ${processTime} s`;
         pTimeProcess.id = `time_process`;
         newDiv.append(pNumberProcess, pCreated, pReady, pExecuting, pTerminated, pTimeProcess);
         processes.appendChild(newDiv);
     }
+    totalTime.innerHTML = `<p><b>Tiempo total: ${processTime} s</b></p>`;
 
-    for (let i = 1; i <= processQuantity; i++) {
+    for (let i = 0; i < processQuantity; i++) {
         document.getElementById(`created${i}`).style.background = BLUE_COLOR;
     }
 
     const sleep = (milliseconds) => {
         return new Promise((resolve) => {setTimeout(resolve, milliseconds)})
     }
-    const changeToReady = async () => {
-        for (let i = 1; i <= processQuantity; i++) {
+    const changeState = async () => {
+        await sleep(1000);
+        for (let i = 0; i < processQuantity; i++) {
             await sleep(300);
             document.getElementById(`created${i}`).style.background = DARK_GRAY_COLOR;
             document.getElementById(`ready${i}`).style.background = YELLOW_COLOR;
@@ -89,59 +97,237 @@ function serialProcessing(processQuantity) {
             document.getElementById(`ready${i}`).style.background = DARK_GRAY_COLOR;
             document.getElementById(`executing${i}`).style.background = GREEN_COLOR;
 
-            for (let j = 1; j <= processTimes[i-1]; j++) {
+            for (let j = 0; j < processTimes[i]; j++) {
                 await sleep(1000);
-                document.getElementById(`process${i}`).lastChild.innerText = `Time: ${processTimes[i-1] - j} s`;
+                document.getElementById(`process${i}`).lastChild.innerText = `Tiempo: ${processTimes[i] - (j+1)} s`;
+                processTime++;
+                totalTime.innerHTML = `<p><b>Tiempo total: ${processTime} s</b></p>`;
             }
             document.getElementById(`executing${i}`).style.background = DARK_GRAY_COLOR;
             document.getElementById(`terminated${i}`).style.background = ORANGE_COLOR;
         }
     }
-    changeToReady();
-
-    // for (let i = 1; i <= processQuantity; i++) {
-    //     await sleep(500).then(() => {
-    //     });
-        // setTimeout(() => {
-        // }, 500*i);
-        // setTimeout(() => {
-        //     document.getElementById(`ready${i}`).style.background = DARK_GRAY_COLOR;
-        //     document.getElementById(`executing${i}`).style.background = GREEN_COLOR;
-        // }, 1000*i);
-    // }
-    totalTime.innerHTML = `<p><b>Tiempo total</b></p>`;
-
-}
-
-async function sleep(msec) {
-    return new Promise(resolve => setTimeout(resolve, msec));
+    changeState();
 }
 
 function batchProcessingMono(processQuantity) {
+    let processSizes = [];
+    let processTimes = [];
+    let memorySize = 256;
+    let actualProcessTime = 0;
+    const pTotalMemory = document.createElement('p');
+    pTotalMemory.innerHTML = `<b>Memoria Total: ${memorySize} KB</b>`;
+    pTotalMemory.id = 'memory_size';
+    const pBusyMemory = document.createElement('p');
+    pBusyMemory.innerHTML = `<b>Memoria Ocupada: 0 KB</b>`;
+    pBusyMemory.id = 'busy_memory';
+    memoryInfo.append(pTotalMemory, pBusyMemory);
     for (let i = 0; i < processQuantity; i++) {
-        const element = array[i];
-        
+        const newDiv = document.createElement('div');
+        newDiv.id = `process${i}`;
+        const pNumberProcess = document.createElement('p');
+        pNumberProcess.innerHTML = `<b>Proceso ${i+1}</b>`;
+        pNumberProcess.id = 'number_process';
+        const pCreated = document.createElement('p');
+        pCreated.innerHTML = '<b>Created</b>';
+        pCreated.id = `created${i}`;
+        const pReady = document.createElement('p');
+        pReady.innerHTML = '<b>Ready</b>';
+        pReady.id = `ready${i}`;
+        const pExecuting = document.createElement('p');
+        pExecuting.innerHTML = '<b>Executing</b>';
+        pExecuting.id = `executing${i}`;
+        const pTerminated = document.createElement('p');
+        pTerminated.innerHTML = '<b>Terminated</b>';
+        pTerminated.id = `terminated${i}`;
+        let processSize = generatePseudoRandom(50, 80);
+        processSizes.push(processSize);
+        const pProcessSize = document.createElement('p');
+        pProcessSize.innerHTML = `Tamaño: ${processSize} KB`;
+        pProcessSize.id = 'size_process';
+        let processTime = generatePseudoRandom(3, 7);
+        processTimes.push(processTime);
+        const pTimeProcess = document.createElement('p');
+        pTimeProcess.innerText = `Tiempo: ${processTime} s`;
+        pTimeProcess.id = 'time_process';
+        newDiv.append(pNumberProcess, pCreated, pReady, pExecuting, pTerminated, pProcessSize, pTimeProcess);
+        processes.appendChild(newDiv);
     }
+
+    for (let i = 0; i < processQuantity; i++) {
+        document.getElementById(`created${i}`).style.background = BLUE_COLOR;
+    }
+
+    const sleep = (milliseconds) => {
+        return new Promise((resolve) => {setTimeout(resolve, milliseconds)})
+    }
+
+    let sumProcessesSize = 0;
+    let attended = 0;
+    const changeState = async () => {
+        await sleep(1000);
+        for (let i = 0; i < processQuantity; i++) {
+            sumProcessesSize += processSizes[i];
+            if (sumProcessesSize > memorySize || i == processQuantity-1) {
+                if (i != processQuantity-1 || (i == processQuantity-1 && sumProcessesSize > memorySize)) {
+                    sumProcessesSize -= processSizes[i];
+                } else if (i == processQuantity-1 && sumProcessesSize <= memorySize) {
+                    i++;
+                }
+
+                await sleep(500);
+                document.getElementById('busy_memory').innerHTML = `<b>Memoria Ocupada: ${sumProcessesSize} KB</b>`;
+                for (let j = attended; j < i; j++) {
+                    document.getElementById(`created${j}`).style.background = DARK_GRAY_COLOR;
+                    document.getElementById(`ready${j}`).style.background = YELLOW_COLOR;
+                    await sleep(70);
+                }
+                for (let j = attended; j < i; j++) {
+                    document.getElementById(`ready${j}`).style.background = DARK_GRAY_COLOR;
+                    document.getElementById(`executing${j}`).style.background = GREEN_COLOR;
+                    for (let k = 0; k < processTimes[j]; k++) {
+                        await sleep(1000);
+                        document.getElementById(`process${j}`).lastChild.innerText = `Tiempo: ${processTimes[j] - (k+1)} s`;
+                        actualProcessTime++;
+                        totalTime.innerHTML = `<p><b>Tiempo total: ${actualProcessTime} s</b></p>`;
+                    }
+                    document.getElementById(`executing${j}`).style.background = DARK_GRAY_COLOR;
+                    document.getElementById(`terminated${j}`).style.background = ORANGE_COLOR;
+                }
+                attended = i;
+                sumProcessesSize = 0;
+                i--;
+            }
+        }
+    }
+    changeState();
 }
 
 function batchProcessingMulti(processQuantity) {
+    let processTimes = [];
+    let processTime = 0;
     for (let i = 0; i < processQuantity; i++) {
-        const element = array[i];
-        
+        const newDiv = document.createElement('div');
+        newDiv.id = `process${i}`;
+        const pNumberProcess = document.createElement('p');
+        pNumberProcess.innerHTML = `<b>Proceso ${i+1}</b>`;
+        pNumberProcess.id = 'number_process';
+        const pCreated = document.createElement('p');
+        pCreated.innerHTML = '<b>Created</b>';
+        pCreated.id = `created${i}`;
+        const pReady = document.createElement('p');
+        pReady.innerHTML = '<b>Ready</b>';
+        pReady.id = `ready${i}`;
+        const pExecuting = document.createElement('p');
+        pExecuting.innerHTML = '<b>Executing</b>';
+        pExecuting.id = `executing${i}`;
+        const pTerminated = document.createElement('p');
+        pTerminated.innerHTML = '<b>Terminated</b>';
+        pTerminated.id = `terminated${i}`;
+        let processTime = generatePseudoRandom(3, 7);
+        processTimes.push(processTime);
+        const pTimeProcess = document.createElement('p');
+        pTimeProcess.innerText = `Tiempo: ${processTime} s`;
+        pTimeProcess.id = `time_process`;
+        newDiv.append(pNumberProcess, pCreated, pReady, pExecuting, pTerminated, pTimeProcess);
+        processes.appendChild(newDiv);
     }
+    totalTime.innerHTML = `<p><b>Tiempo total: ${processTime} s</b></p>`;
+
+    for (let i = 0; i < processQuantity; i++) {
+        document.getElementById(`created${i}`).style.background = BLUE_COLOR;
+    }
+
+    const sleep = (milliseconds) => {
+        return new Promise((resolve) => {setTimeout(resolve, milliseconds)})
+    }
+    const changeState = async () => {
+        for (let i = 0; i < processQuantity; i++) {
+            await sleep(300);
+            document.getElementById(`created${i}`).style.background = DARK_GRAY_COLOR;
+            document.getElementById(`ready${i}`).style.background = YELLOW_COLOR;
+            await sleep(300);
+            document.getElementById(`ready${i}`).style.background = DARK_GRAY_COLOR;
+            document.getElementById(`executing${i}`).style.background = GREEN_COLOR;
+
+            for (let j = 0; j < processTimes[i]; j++) {
+                await sleep(1000);
+                document.getElementById(`process${i}`).lastChild.innerText = `Tiempo: ${processTimes[i]-(j+1)} s`;
+                processTime++;
+                totalTime.innerHTML = `<p><b>Tiempo total: ${processTime} s</b></p>`;
+            }
+            document.getElementById(`executing${i}`).style.background = DARK_GRAY_COLOR;
+            document.getElementById(`terminated${i}`).style.background = ORANGE_COLOR;
+        }
+    }
+    changeState();
 }
 
 function shareTimeSystem(processQuantity) {
+    let processTimes = [];
+    let processTime = 0;
     for (let i = 0; i < processQuantity; i++) {
-        const element = array[i];
-        
+        const newDiv = document.createElement('div');
+        newDiv.id = `process${i}`;
+        const pNumberProcess = document.createElement('p');
+        pNumberProcess.innerHTML = `<b>Proceso ${i+1}</b>`;
+        pNumberProcess.id = 'number_process';
+        const pCreated = document.createElement('p');
+        pCreated.innerHTML = '<b>Created</b>';
+        pCreated.id = `created${i}`;
+        const pReady = document.createElement('p');
+        pReady.innerHTML = '<b>Ready</b>';
+        pReady.id = `ready${i}`;
+        const pExecuting = document.createElement('p');
+        pExecuting.innerHTML = '<b>Executing</b>';
+        pExecuting.id = `executing${i}`;
+        const pTerminated = document.createElement('p');
+        pTerminated.innerHTML = '<b>Terminated</b>';
+        pTerminated.id = `terminated${i}`;
+        let processTime = generatePseudoRandom(3, 7);
+        processTimes.push(processTime);
+        const pTimeProcess = document.createElement('p');
+        pTimeProcess.innerText = `Tiempo: ${processTime} s`;
+        pTimeProcess.id = `time_process`;
+        newDiv.append(pNumberProcess, pCreated, pReady, pExecuting, pTerminated, pTimeProcess);
+        processes.appendChild(newDiv);
     }
+    totalTime.innerHTML = `<p><b>Tiempo total: ${processTime} s</b></p>`;
+
+    for (let i = 0; i < processQuantity; i++) {
+        document.getElementById(`created${i}`).style.background = BLUE_COLOR;
+    }
+
+    const sleep = (milliseconds) => {
+        return new Promise((resolve) => {setTimeout(resolve, milliseconds)})
+    }
+    const changeState = async () => {
+        for (let i = 0; i < processQuantity; i++) {
+            await sleep(300);
+            document.getElementById(`created${i}`).style.background = DARK_GRAY_COLOR;
+            document.getElementById(`ready${i}`).style.background = YELLOW_COLOR;
+            await sleep(300);
+            document.getElementById(`ready${i}`).style.background = DARK_GRAY_COLOR;
+            document.getElementById(`executing${i}`).style.background = GREEN_COLOR;
+
+            for (let j = 0; j < processTimes[i]; j++) {
+                await sleep(1000);
+                document.getElementById(`process${i}`).lastChild.innerText = `Tiempo: ${processTimes[i]-(j+1)} s`;
+                processTime++;
+                totalTime.innerHTML = `<p><b>Tiempo total: ${processTime} s</b></p>`;
+            }
+            document.getElementById(`executing${i}`).style.background = DARK_GRAY_COLOR;
+            document.getElementById(`terminated${i}`).style.background = ORANGE_COLOR;
+        }
+    }
+    changeState();
 }
 
 function resetDivProcesses() {
+    memoryInfo.innerHTML = '';
     processes.innerHTML = '';
 }
 
-function generatePseudoRandomProcessTime(minSec, maxSec) {
+function generatePseudoRandom(minSec, maxSec) {
     return Math.round(Math.random() * (maxSec - minSec)) + minSec;
 }

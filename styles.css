@@ -139,7 +139,7 @@ input[type='radio']:checked:before {
     border-radius: 10px;
 }
 
-#number_process, #time_process {
+#number_process, #time_process, #memory_size, #busy_memory, #size_process {
     color: var(--dark-gray);
     background: transparent;
 }
