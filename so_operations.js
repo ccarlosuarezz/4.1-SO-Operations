@@ -18,8 +18,6 @@ const RED_COLOR = '#F90716';
 const DARK_GRAY_COLOR = '#423F3E';
 const WITHE_COLOR = '#F7F7F7';
 
-const SECOND_IN_MILISECONDS = 1000;
-
 execButton.addEventListener('click', simulate);
 
 function simulate() {
@@ -45,6 +43,10 @@ function simulate() {
     }
 }
 
+/**
+ * Método que permite simular las operaciones de un sistema operativo con Procesamiento en serie
+ * @param {Cantidad de procesos a simular} processQuantity 
+ */
 function serialProcessing(processQuantity) {
     let processTimes = [];
     let processTime = 0;
@@ -106,6 +108,10 @@ function serialProcessing(processQuantity) {
     changeState();
 }
 
+/**
+ * Método que permite simular las operaciones de un sistema operativo con Procesamiento por lotes con Monoprogramación
+ * @param {Cantidad de procesos a simular} processQuantity 
+ */
 function batchProcessingMono(processQuantity) {
     let processSizes = [];
     let processTimes = [];
@@ -199,6 +205,10 @@ function batchProcessingMono(processQuantity) {
     changeState();
 }
 
+/**
+ * Método que permite simular las operaciones de un sistema operativo con Procesamiento por lotes con Multiprogramación
+ * @param {Cantidad de procesos a simular} processQuantity 
+ */
 function batchProcessingMulti(processQuantity) {
     let processSizes = [];
     let processTimes = [];
@@ -329,6 +339,11 @@ function batchProcessingMulti(processQuantity) {
     changeState();
 }
 
+
+/**
+ * Método que permite simular las operaciones de un sistema operativo con Sistemas de tiempo compartido
+ * @param {Cantidad de procesos a simular} processQuantity 
+ */
 function shareTimeSystem(processQuantity) {
     let processTimes = [];
     const QUANTUM = 3; //medida en segundos
