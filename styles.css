@@ -150,7 +150,7 @@ input[type='radio']:checked:before {
     border-radius: 10px;
 }
 
-#number_process, #time_process, #memory_size, #busy_memory, #size_process {
+#number_process, #time_process, #memory_size, #busy_memory, #size_process, #quantum, #total_time, h1, label {
     color: var(--dark-gray);
     background: transparent;
 }
