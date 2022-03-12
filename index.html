@@ -8,26 +8,8 @@
     <link rel="stylesheet" href="styles.css">
     <title>SO Operations</title>
 </head>
-<body>
-    <h1>Operaciones de un Sistema Operativo</h1>
-    <div class="input_architectures">
-        <div>
-            <input type="radio" name="architecture" id="arch_serie">
-            <label for="arch_serie"><strong>Procesamiento en serie</strong></label>
-        </div>
-        <div>
-            <input type="radio" name="architecture" id="arch_batch_mono">
-            <label for="arch_batch_mono"><strong>Procesamiento por lotes (Monoprogramación)</strong></label>
-        </div>
-        <div>
-            <input type="radio" name="architecture" id="arch_batch_multi">
-            <label for="arch_batch_multi"><strong>Procesamiento por lotes (Multiprogramación)</strong></label>
-        </div>
-        <div>
-            <input type="radio" name="architecture" id="arch_shared_time">
-            <label for="arch_shared_time"><strong>Sistemas de tiempo compartido</strong></label>
-        </div>
-    </div>
+<body id="body">
+    <h1> Programando un proceso y la memoria</h1>
     <div class="form_container">
         <div class="form">
             <input type="number" name="process_quantity_value" id="process_quantity" autocomplete="off" required/>
@@ -37,9 +19,90 @@
         </div>
         <button id="exec_button" class="exec_button"><b>Ejecutar</b></button>
     </div>
-    <div id="memory_info" class="memory"></div>
-    <div id="processes" class="processes"></div>
-    <div id="total_time"></div>
+
+    <div class="info">
+        <p>Quantum: 3 seg</p>
+        <p>Tamaño de marco: 16 MB</p>
+    </div>
+
+    <div class="tables">
+        <!-- Tabla de procesos -->
+        <div class="table_container">
+            <p>Cola de procesos</p>
+            <div class="scroll_table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Proceso</th>
+                            <th>Tamaño (MB)</th>
+                            <th>Tiempo de procesamiento (s)</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="process_list">
+                        <tr>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <!-- Tabla de memoria principal-->
+        <div class="table_container">
+            <p>Memoria principal (256 MB)</p>
+            <div class="scroll_table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Marco</th>
+                            <th>Proceso</th>
+                            <th>Tamaño ocupado (MB)</th>
+                            <th>Tamaño libre (MB)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="principal_memory">
+                        <tr>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    
+        <!-- Tabla de memoria virtual -->
+        <div class="table_container">
+            <p>Memoria virtual (512 MB)</p>
+            <div class="scroll_table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Marco</th>
+                            <th>Proceso</th>
+                            <th>Tamaño ocupado (MB)</th>
+                            <th>Tamaño libre (MB)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="virtual_memory">
+                        <tr>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                            <td>0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="Process.js"></script>
+    <script src="Frame.js"></script>
     <script src="so_operations.js"></script>
 </body>
 </html>
